@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About | Pest & Crop Disease Prediction</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <header>
+    <h1>Pest & Crop Disease Prediction System</h1>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('about') }}" class="active">About</a></li>
+        <li><a href="{{ url_for('predict') }}">Predict</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="about">
+    <h2>About the Project</h2>
+    <p>
+      Agriculture plays a vital role in sustaining the global economy and ensuring food security. 
+      However, crop production faces serious challenges due to pest infestations and plant diseases,
+      leading to reduced yield and financial loss for farmers.This project integrates Federated Learning (FL) and Tiny Machine Learning (TinyML) to overcome challenges like limited internet access, energy constraints, and privacy concerns. TinyML enables lightweight models to run directly on low-power IoT devices, while FL allows collaborative model training without data sharing. The proposed Federated AIoT framework ensures privacy-preserving, energy-efficient, and scalable crop disease detection, providing farmers with timely insights and promoting sustainable agriculture. 
+    </p>
+
+    <p>
+      The <strong>Pest & Crop Disease Prediction System</strong> helps farmers detect crop diseases early using
+      machine learning techniques by analysing images of affected crops and suggesting preventive measures.
+    </p>
+
+    <h3>Objectives</h3>
+    <ul>
+      <li>To integrate Federated Learning for collaborative training across farms without sharing raw crop data, ensuring privacy and scalability. </li>
+      <li>To design a lightweight TinyML-based model for crop pest and disease detection that can run efficiently on low-power IoT devices. </li>
+      
+    </ul>
+
+    <h3>Technology Used</h3>
+    <ul>
+      <li>HTML, CSS – For designing a user-friendly web interface.</li>
+      <li>Python (Flask) – For integrating machine learning backend.</li>
+      <li>TensorFlow / Keras , Flower– For model training and prediction.</li>
+    </ul>
+
+    <div class="about-img">
+      <img src="https://media.licdn.com/dms/image/v2/C4D12AQHIoZ7WArUCww/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1567984937815?e=2147483647&v=beta&t=JMZZpMjOUE-XsB9_cMHbCmuN_yuGwYa99TYUmYxxkyE" alt="Healthy Crop Field" style="width:800px;height:400px;">
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Pest & Crop Disease Prediction Project | Developed by Arshdeep Kaur</p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediction Result | Pest & Crop Disease Prediction</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <header>
+    <h1>Pest & Crop Disease Prediction System</h1>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('about') }}">About</a></li>
+        <li><a href="{{ url_for('predict') }}">Predict</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="result">
+    <h2>Prediction Result</h2>
+
+    <div class="result-card">
+      {% if image_url %}
+        <img src="{{ image_url }}" alt="Uploaded Image" width="300">
+      {% endif %}
+
+      <p><b>Predicted Class:</b> {{ prediction }}</p>
+      <p><b>Confidence:</b> {{ confidence }}%</p>
+
+      <a href="{{ url_for('predict') }}" class="btn">Try Another Image</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Pest & Crop Disease Prediction Project | Developed by Arshdeep Kaur</p>
+  </footer>
+
+</body>
+</html>

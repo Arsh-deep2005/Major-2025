@@ -1,0 +1,115 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predict | Pest & Crop Disease Prediction</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <header>
+    <h1>Pest & Crop Disease Prediction System</h1>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('about') }}">About</a></li>
+        <li><a href="{{ url_for('predict') }}" class="active">Predict</a></li>
+      </ul>
+    </nav>
+  </header>
+
+ <section class="predict">
+  <h2>Upload Crop Image for Disease Prediction</h2>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="flash">
+        {% for msg in messages %}
+          <p>{{ msg }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept="image/*" required>
+    <button type="submit" class="btn">Predict</button>
+  </form>
+</section>
+
+
+  <footer>
+    <p>&copy; 2025 Pest & Crop Disease Prediction Project | Developed by Arshdeep Kaur</p>
+  </footer>
+
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Predict | Crop Disease</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header>
+  <h1>Disease Prediction</h1>
+  <nav>
+    <ul>
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('about') }}">About</a></li>
+      <li><a href="{{ url_for('predict') }}" class="active">Predict</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="predict">
+
+  <h2>Predict Crop Disease</h2>
+
+  <form action="{{ url_for('predict') }}" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" accept="image/*" required>
+    <button type="submit" class="btn">Predict</button>
+  </form>
+
+  <hr>
+
+  <h2>Upload Image for Future Training</h2>
+
+  <form id="uploadForm" enctype="multipart/form-data" action="{{ url_for('upload') }}" method="POST">
+    <input type="file" name="file" accept="image/*" required>
+    <input type="text" name="label" placeholder="Enter label">
+    <input type="hidden" name="uploader" value="farm_1">
+    <button type="submit" class="btn">Upload</button>
+  </form>
+
+</section>
+
+
+<script>
+document.getElementById("uploadForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+    let fd = new FormData(this);
+
+    let res = await fetch("/upload", {
+        method: "POST",
+        body: fd
+    });
+
+    let data = await res.json();
+    alert(JSON.stringify(data));
+});
+</script>
+
+<footer>
+  <p>© 2025 Crop Disease Project</p>
+</footer>
+
+</body>
+</html>

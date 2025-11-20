@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pest & Crop Disease Prediction</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <header>
+    <h1>Pest & Crop Disease Prediction System</h1>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('home') }}" class="active">Home</a></li>
+        <li><a href="{{ url_for('about') }}">About</a></li>
+        <li><a href="{{ url_for('predict') }}">Predict</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h2>Detect Crop Diseases Early, Protect Your Yield!</h2>
+    <p>
+      Our intelligent system uses advanced machine learning algorithms to help farmers
+      identify pest infestations and crop diseases in the early stages.
+    </p>
+    <a href="{{ url_for('predict') }}" class="btn">Try Prediction</a>
+  </section>
+
+  <section class="features">
+    <h2>Key Features</h2>
+    <div class="feature-container">
+      <div class="feature">
+        <h3>🌿 Image-Based Detection</h3>
+        <p>Upload images of your crops to instantly detect diseases or pest attacks.</p>
+      </div>
+      <div class="feature">
+        <h3>📊 Accurate Results</h3>
+        <p>Get predictions powered by AI models trained on real agricultural datasets.</p>
+      </div>
+      <div class="feature">
+        <h3>🧑‍🌾 Easy to Use</h3>
+        <p>Simple and farmer-friendly interface accessible on any device.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Pest & Crop Disease Prediction Project | Developed by Arshdeep Kaur</p>
+  </footer>
+
+</body>
+</html>
