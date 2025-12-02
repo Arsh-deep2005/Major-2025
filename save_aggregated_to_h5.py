@@ -42,15 +42,19 @@
 
 # save_aggregated_to_h5.py
 """
-Load aggregated_weights.pkl (Flower Parameters or list), convert to numpy arrays,
-detect number of classes from final bias vector, build matching Keras model,
-set weights and save global_model.h5 (and class_count.json).
+Adds full debug printing to track:
+- Weight loading
+- Conversion to ndarray
+- Class detection
+- Model reconstruction
+- Weight assignment
+- H5 save confirmation
 """
+
 import pickle
 import sys
 from pathlib import Path
 
-# flwr conversion helper (handles different flwr versions)
 try:
     from flwr.common import parameters_to_ndarrays
 except Exception:
@@ -61,9 +65,10 @@ from tensorflow.keras import layers, models
 
 OUT_H5 = "global_model.h5"
 AGG_PICKLE = "aggregated_weights.pkl"
-CLASS_COUNT_JSON = "global_class_count.txt"  # simple text file with class count
+CLASS_COUNT_JSON = "global_class_count.txt"
 
 def build_model(num_classes, input_shape=(128,128,3)):
+    print(f"[build] Building model with num_classes={num_classes}")
     model = models.Sequential([
         layers.Conv2D(32, (3,3), activation='relu', input_shape=input_shape),
         layers.MaxPooling2D(2,2),
@@ -77,106 +82,122 @@ def build_model(num_classes, input_shape=(128,128,3)):
         layers.Dense(num_classes, activation='softmax')
     ])
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    print("[build] Model created and compiled.")
     return model
 
 def load_parameters_pickle(path: Path):
+    print(f"[load] Opening pickle file: {path}")
     with path.open("rb") as f:
         obj = pickle.load(f)
+    print("[load] Pickle loaded successfully.")
     return obj
 
 def to_ndarrays(maybe_parameters):
-    """
-    Convert Flower Parameters to list of ndarrays if necessary,
-    or pass through if already ndarray list.
-    """
+    print("[convert] Converting Flower parameters to numpy arrays...")
     if isinstance(maybe_parameters, list):
+        print("[convert] Already list of ndarrays.")
         return maybe_parameters
-    # If it's flwr Parameters object and parameters_to_ndarrays available:
+
     if parameters_to_ndarrays is not None:
         try:
             nds = parameters_to_ndarrays(maybe_parameters)
+            print("[convert] Converted using parameters_to_ndarrays.")
             return nds
-        except Exception:
-            pass
-    # Last resort: try attribute names often present
-    # Try to detect .tensors or .weights or .ndarrays
+        except Exception as e:
+            print("[convert] parameters_to_ndarrays failed:", e)
+
     if hasattr(maybe_parameters, "tensors"):
+        print("[convert] Found .tensors attribute")
         return list(maybe_parameters.tensors)
+
     if hasattr(maybe_parameters, "ndarrays"):
+        print("[convert] Found .ndarrays attribute")
         return list(maybe_parameters.ndarrays)
+
     if hasattr(maybe_parameters, "weights"):
+        print("[convert] Found .weights attribute")
         return list(maybe_parameters.weights)
-    raise ValueError("Unsupported aggregated object type. It is not a list and conversion failed.")
+
+    raise ValueError("[convert] Unsupported parameter type. Cannot extract arrays.")
 
 def detect_num_classes_from_weights(weights):
-    """Assume last weight array is bias of final Dense -> 1-D length == num_classes"""
+    print("[detect] Detecting number of output classes from last bias vector...")
     if not weights:
-        raise ValueError("Empty weights list")
+        raise ValueError("[detect] ERROR: Weight list empty.")
+
     last = weights[-1]
+    print("[detect] Last tensor shape:", last.shape)
+
     if isinstance(last, np.ndarray) and last.ndim == 1:
+        print("[detect] Last bias vector found. Num classes =", last.shape[0])
         return int(last.shape[0])
-    # Some save orders might place bias earlier; search for 1D array in last few entries
-    for arr in reversed(weights[-6:]):  # check last up to 6 arrays
+
+    print("[detect] Searching last 6 tensors for bias...")
+    for arr in reversed(weights[-6:]):
         if isinstance(arr, np.ndarray) and arr.ndim == 1:
+            print("[detect] Bias detected. Num classes =", arr.shape[0])
             return int(arr.shape[0])
-    raise ValueError("Could not infer num_classes from aggregated weights (no 1D bias found).")
+
+    raise ValueError("[detect] ERROR: Could not detect num_classes from any bias vector!")
 
 def main():
     p = Path(AGG_PICKLE)
     if not p.exists():
-        print(f"ERROR: {AGG_PICKLE} not found in current folder: {Path.cwd()}")
+        print(f"❌ ERROR: {AGG_PICKLE} not found in folder: {Path.cwd()}")
         sys.exit(1)
 
-    print("[save] Loading aggregated weights from", AGG_PICKLE)
+    print(f"\n================ LOAD AGGREGATED WEIGHTS ================")
     params = load_parameters_pickle(p)
 
     try:
         weights = to_ndarrays(params)
     except Exception as e:
-        print("❌ Conversion to ndarrays failed:", e)
+        print("❌ Conversion failed:", e)
         sys.exit(1)
 
-    # ensure numpy arrays
     weights = [np.array(w) for w in weights]
-    print(f"[save] Converted aggregated parameters -> {len(weights)} tensors.")
+    print(f"[save] Total tensors received = {len(weights)}")
 
-    # detect num_classes
+    print(f"[save] First tensor shape: {weights[0].shape}")
+
+    print("\n================ DETECT NUM CLASSES ================")
     try:
         num_classes = detect_num_classes_from_weights(weights)
     except Exception as e:
-        print("❌ Could not detect num_classes:", e)
+        print("❌ Detection Error:", e)
         sys.exit(1)
 
-    print(f"[save] Detected num_classes = {num_classes}")
+    print(f"[save] ✔ Number of Classes Detected = {num_classes}")
 
-    # build model with detected classes
+    print("\n================ BUILD MODEL ================")
     model = build_model(num_classes=num_classes)
 
-    # quick check: number of arrays from model.get_weights()
     model_weights_template = model.get_weights()
-    print("[save] Model expects", len(model_weights_template), "weight arrays.")
+    print(f"[save] Model expects {len(model_weights_template)} tensors.")
 
     if len(model_weights_template) != len(weights):
-        print("⚠️ Warning: number of aggregated tensors != model template tensors.")
-        print("Template lengths: expected", len(model_weights_template), "got", len(weights))
-        # Try a flexible approach: if lengths match after removing optimizer tensors etc.
-        # But Keras get_weights for Sequential normally matches. We'll attempt set_weights and catch error.
+        print("⚠️ WARNING: Mismatch in tensor count!")
+        print("⚠️ Template expects:", len(model_weights_template))
+        print("⚠️ Aggregated:", len(weights))
+
+    print("\n================ SET MODEL WEIGHTS ================")
     try:
         model.set_weights(weights)
+        print("[save] ✔ Weights successfully loaded into model.")
     except Exception as e:
-        print("\n❌ ERROR setting weights! This usually means the model architecture (layer shapes) does not match aggregated weights.")
-        print("Error:", e)
-        print("Suggestion: ensure clients used exactly the same model architecture and same input size.")
+        print("❌ ERROR setting weights:", e)
+        print("💡 Hint: Clients must have SAME model architecture + SAME class count.")
         raise
 
-    # Save final model
+    print("\n================ SAVE GLOBAL MODEL ================")
     model.save(OUT_H5)
-    print(f"\n✅ Saved global model to: {OUT_H5}")
+    print(f"✅ Saved updated FL global model → {OUT_H5}")
 
-    # Save class count for Flask (simple)
     with open(CLASS_COUNT_JSON, "w") as f:
         f.write(str(num_classes))
-    print(f"[save] Wrote {CLASS_COUNT_JSON} with value {num_classes}")
+    print(f"📄 Saved number of classes → {CLASS_COUNT_JSON}")
+
+    print("\n🎉 All steps completed successfully.")
 
 if __name__ == "__main__":
     main()
