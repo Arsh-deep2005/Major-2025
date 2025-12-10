@@ -78,16 +78,40 @@
     <button type="submit" class="btn">Predict</button>
   </form>
 
+  <br>
   <hr>
 
-  <h2>Upload Image for Future Training</h2>
-
-  <form id="uploadForm" enctype="multipart/form-data" action="{{ url_for('upload') }}" method="POST">
-    <input type="file" name="file" accept="image/*" required>
-    <input type="text" name="label" placeholder="Enter label">
-    <input type="hidden" name="uploader" value="farm_1">
-    <button type="submit" class="btn">Upload</button>
-  </form>
+   <!-- Upload for Training Form -->
+  <div class="upload-section">
+    <h2>Upload Image for Future Training</h2>
+    <p class="help-text">Upload a correctly labeled image to improve the model</p>
+    
+    <br>
+    <form id="uploadForm" enctype="multipart/form-data" action="{{ url_for('upload') }}" method="POST">
+      <div class="form-group">
+        <label for="training-image">Select Training Image:</label>
+        <input type="file" id="training-image" name="file" accept="image/*" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="disease-label">Select Disease Label:</label>
+        <select id="disease-label" name="label" required>
+          <option value="" disabled selected>-- Select a disease --</option>
+          <option value="Bacterial Leaf Blight">Bacterial Leaf Blight</option>
+          <option value="Brown Spot">Brown Spot</option>
+          <option value="Healthy Rice Leaf">Healthy Rice Leaf</option>
+          <option value="Leaf Blast">Leaf Blast</option>
+          <option value="Leaf Scald">Leaf Scald</option>
+          <option value="Sheath Blight">Sheath Blight</option>
+        </select>
+        <small class="form-help">Choose the correct disease for this image</small>
+      </div>
+      
+      <!-- Hidden field to identify which farm is uploading -->
+      <input type="hidden" name="uploader" value="farm_1">
+      
+      <button type="submit" class="btn btn-upload">Upload for Training</button>
+    </form>
 
 </section>
 

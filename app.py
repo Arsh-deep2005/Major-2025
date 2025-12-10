@@ -147,7 +147,7 @@ def upload():
 
         ALLOWED_LABELS = [
             "Bacterial Leaf Blight",
-            "Brown_spot",
+            "Brown Spot",
             "Healthy Rice Leaf",
             "Leaf Blast",
             "Leaf scald",
